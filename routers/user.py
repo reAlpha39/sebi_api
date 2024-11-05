@@ -5,12 +5,12 @@ from schemas.user import UserCreate, UserUpdate, UserResponse, UsersListResponse
 from models.user import UserModel
 
 router = APIRouter(
-    prefix="/api",
+    prefix="",
     tags=["users"]
 )
 
 
-@router.post("", response_model=UserResponse)
+@router.post("/", response_model=UserResponse)
 async def create_user(user: UserCreate):
     created_user = await UserModel.create_user(user.model_dump())
     return {
@@ -20,7 +20,7 @@ async def create_user(user: UserCreate):
     }
 
 
-@router.get("", response_model=UsersListResponse)
+@router.get("/", response_model=UsersListResponse)
 async def get_users(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
