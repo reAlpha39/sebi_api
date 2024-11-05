@@ -78,22 +78,3 @@ def update_user(user_id):
 def delete_user(user_id):
     result = UserModel.delete_user(user_id)
     return jsonify(result)
-
-
-# schemas/user.py
-
-
-def validate_user_create(data):
-    # Add validation logic here
-    if not data:
-        abort(400, description="Invalid request data")
-    # Add more specific validation as needed
-    return data
-
-
-def validate_user_update(data):
-    # Add validation logic here
-    if not data:
-        abort(400, description="Invalid request data")
-    # Add more specific validation as needed
-    return data
