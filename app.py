@@ -1,13 +1,19 @@
-from quart import Quart
-from quart_cors import cors
-from routers.user import user_bp
+from flask import Flask
+from flask_cors import CORS
+from routers import user
 
-app = Quart(__name__)
-app = cors(app, allow_origin="*", allow_credentials=True,
-           allow_methods=["*"], allow_headers=["*"])
+app = Flask(__name__)
+CORS(app, resources={
+    r"/*": {
+        "origins": "*",
+        "allow_credentials": True,
+        "methods": ["*"],
+        "headers": ["*"]
+    }
+})
 
 # Register blueprints
-app.register_blueprint(user_bp)
+app.register_blueprint(user.bp)
 
 application = app
 

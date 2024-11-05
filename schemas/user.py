@@ -1,21 +1,16 @@
 from pydantic import BaseModel
-from datetime import datetime
 from typing import Optional
-
+from datetime import datetime
 
 def validate_user_create(data):
-    # Add validation logic here
     if not data:
         abort(400, description="Invalid request data")
-    # Add more specific validation as needed
     return data
 
 
 def validate_user_update(data):
-    # Add validation logic here
     if not data:
         abort(400, description="Invalid request data")
-    # Add more specific validation as needed
     return data
 
 
