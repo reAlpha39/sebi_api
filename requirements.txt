@@ -5,5 +5,7 @@ regex
 Flask-RESTful
 mysql-connector
 uvicorn
-fastapi
 pydantic_settings
+fastapi[all]
+gunicorn
+python-multipart
