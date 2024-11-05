@@ -1,0 +1,8 @@
+flask
+Flask-Cors 
+waitress
+regex
+Flask-RESTful
+mysql-connector
+uvicorn
+fastapi
