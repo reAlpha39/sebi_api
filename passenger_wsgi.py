@@ -1,5 +1,1 @@
-from app import app
-import sys
-import os
-
-application = app
+from app import app as application
