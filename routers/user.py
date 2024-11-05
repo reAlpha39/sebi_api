@@ -1,41 +1,54 @@
-from fastapi import APIRouter, HTTPException, Query
-from typing import Optional
+from flask import abort
+from flask import Blueprint, request, jsonify
 from datetime import datetime
-from schemas.user import UserCreate, UserUpdate, UserResponse, UsersListResponse
 from models.user import UserModel
+from schemas.user import validate_user_create, validate_user_update
 
-router = APIRouter(
-    prefix="",
-    tags=["users"]
-)
+user_bp = Blueprint('user', __name__)
 
 
-@router.post("/", response_model=UserResponse)
-async def create_user(user: UserCreate):
-    created_user = await UserModel.create_user(user.model_dump())
-    return {
+@user_bp.route('/', methods=['POST'])
+def create_user():
+    data = request.get_json()
+    validated_data = validate_user_create(data)
+    created_user = UserModel.create_user(validated_data)
+    return jsonify({
         "status": "success",
         "message": "User successfully created",
         "data": created_user
-    }
+    })
 
 
-@router.get("/", response_model=UsersListResponse)
-async def get_users(
-    page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
-    include_deleted: bool = Query(False),
-    search: Optional[str] = Query(None),
-    from_date: Optional[datetime] = Query(None),
-    to_date: Optional[datetime] = Query(None)
-):
-    users, total_records = await UserModel.get_users(
+@user_bp.route('/', methods=['GET'])
+def get_users():
+    page = request.args.get('page', 1, type=int)
+    limit = request.args.get('limit', 10, type=int)
+    include_deleted = request.args.get('include_deleted', False, type=bool)
+    search = request.args.get('search', None)
+    from_date = request.args.get('from_date')
+    to_date = request.args.get('to_date')
+
+    # Convert date strings to datetime objects if provided
+    if from_date:
+        from_date = datetime.fromisoformat(from_date)
+    if to_date:
+        to_date = datetime.fromisoformat(to_date)
+
+    # Validate pagination parameters
+    if page < 1:
+        page = 1
+    if limit < 1:
+        limit = 1
+    elif limit > 100:
+        limit = 100
+
+    users, total_records = UserModel.get_users(
         page, limit, include_deleted, search, from_date, to_date
     )
 
     total_pages = (total_records + limit - 1) // limit
 
-    return {
+    return jsonify({
         "status": "success",
         "data": users,
         "pagination": {
@@ -46,19 +59,41 @@ async def get_users(
             "has_next": page < total_pages,
             "has_prev": page > 1
         }
-    }
+    })
 
 
-@router.put("/{user_id}", response_model=UserResponse)
-async def update_user(user_id: int, user: UserUpdate):
-    updated_user = await UserModel.update_user(user_id, user.model_dump())
-    return {
+@user_bp.route('/<int:user_id>', methods=['PUT'])
+def update_user(user_id):
+    data = request.get_json()
+    validated_data = validate_user_update(data)
+    updated_user = UserModel.update_user(user_id, validated_data)
+    return jsonify({
         "status": "success",
         "message": "User successfully updated",
         "data": updated_user
-    }
+    })
 
 
-@router.delete("/{user_id}")
-async def delete_user(user_id: int):
-    return await UserModel.delete_user(user_id)
+@user_bp.route('/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    result = UserModel.delete_user(user_id)
+    return jsonify(result)
+
+
+# schemas/user.py
+
+
+def validate_user_create(data):
+    # Add validation logic here
+    if not data:
+        abort(400, description="Invalid request data")
+    # Add more specific validation as needed
+    return data
+
+
+def validate_user_update(data):
+    # Add validation logic here
+    if not data:
+        abort(400, description="Invalid request data")
+    # Add more specific validation as needed
+    return data

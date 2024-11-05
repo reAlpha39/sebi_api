@@ -1,24 +1,19 @@
-from routers import user
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI
+from flask import Flask
+from flask_cors import CORS
+from routes.user import user_bp
 
-app = FastAPI()
+app = Flask(__name__)
+CORS(app, resources={
+    r"/*": {
+        "origins": "*",
+        "allow_credentials": True,
+        "methods": ["*"],
+        "headers": ["*"]
+    }
+})
 
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Include routers
-app.include_router(user.router)
-
-application = app
+# Register blueprints
+app.register_blueprint(user_bp)
 
 if __name__ == "__main__":
     app.run()
-    # import uvicorn
-    # uvicorn.run("app:app", host="0.0.0.0", port=14368, reload=True)

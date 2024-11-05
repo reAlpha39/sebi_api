@@ -1,11 +1,8 @@
 flask
-Flask-Cors 
+Flask-Cors
 waitress
 regex
 Flask-RESTful
 mysql-connector
-uvicorn
 pydantic_settings
-fastapi[all]
-gunicorn
 python-multipart
