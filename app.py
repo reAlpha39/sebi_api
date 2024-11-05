@@ -1,6 +1,6 @@
 from quart import Quart
 from quart_cors import cors
-from routes.user import user_bp
+from routers.user import user_bp
 
 app = Quart(__name__)
 app = cors(app, allow_origin="*", allow_credentials=True,
