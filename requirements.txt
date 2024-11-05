@@ -6,3 +6,4 @@ Flask-RESTful
 mysql-connector
 uvicorn
 fastapi
+pydantic_settings
