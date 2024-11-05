@@ -5,7 +5,7 @@ from schemas.user import UserCreate, UserUpdate, UserResponse, UsersListResponse
 from models.user import UserModel
 
 router = APIRouter(
-    prefix="/sebi-api",
+    prefix="/",
     tags=["users"]
 )
 
