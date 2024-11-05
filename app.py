@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
-from routes.user import user_bp
+from routers.user import user_bp
 
 app = Flask(__name__)
 CORS(app, resources={
@@ -14,6 +14,8 @@ CORS(app, resources={
 
 # Register blueprints
 app.register_blueprint(user_bp)
+
+application = app
 
 if __name__ == "__main__":
     app.run()
