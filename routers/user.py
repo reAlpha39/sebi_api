@@ -1,5 +1,4 @@
-from flask import abort
-from flask import Blueprint, request, jsonify
+from quart import Blueprint, request, jsonify
 from datetime import datetime
 from models.user import UserModel
 from schemas.user import validate_user_create, validate_user_update
@@ -8,10 +7,10 @@ user_bp = Blueprint('user', __name__)
 
 
 @user_bp.route('/', methods=['POST'])
-def create_user():
-    data = request.get_json()
+async def create_user():
+    data = await request.get_json()
     validated_data = validate_user_create(data)
-    created_user = UserModel.create_user(validated_data)
+    created_user = await UserModel.create_user(validated_data)
     return jsonify({
         "status": "success",
         "message": "User successfully created",
@@ -20,13 +19,14 @@ def create_user():
 
 
 @user_bp.route('/', methods=['GET'])
-def get_users():
-    page = request.args.get('page', 1, type=int)
-    limit = request.args.get('limit', 10, type=int)
-    include_deleted = request.args.get('include_deleted', False, type=bool)
-    search = request.args.get('search', None)
-    from_date = request.args.get('from_date')
-    to_date = request.args.get('to_date')
+async def get_users():
+    args = request.args
+    page = args.get('page', 1, type=int)
+    limit = args.get('limit', 10, type=int)
+    include_deleted = args.get('include_deleted', False, type=bool)
+    search = args.get('search', None)
+    from_date = args.get('from_date')
+    to_date = args.get('to_date')
 
     # Convert date strings to datetime objects if provided
     if from_date:
@@ -42,7 +42,7 @@ def get_users():
     elif limit > 100:
         limit = 100
 
-    users, total_records = UserModel.get_users(
+    users, total_records = await UserModel.get_users(
         page, limit, include_deleted, search, from_date, to_date
     )
 
@@ -63,10 +63,10 @@ def get_users():
 
 
 @user_bp.route('/<int:user_id>', methods=['PUT'])
-def update_user(user_id):
-    data = request.get_json()
+async def update_user(user_id):
+    data = await request.get_json()
     validated_data = validate_user_update(data)
-    updated_user = UserModel.update_user(user_id, validated_data)
+    updated_user = await UserModel.update_user(user_id, validated_data)
     return jsonify({
         "status": "success",
         "message": "User successfully updated",
@@ -75,6 +75,6 @@ def update_user(user_id):
 
 
 @user_bp.route('/<int:user_id>', methods=['DELETE'])
-def delete_user(user_id):
-    result = UserModel.delete_user(user_id)
+async def delete_user(user_id):
+    result = await UserModel.delete_user(user_id)
     return jsonify(result)

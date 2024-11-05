@@ -6,3 +6,5 @@ Flask-RESTful
 mysql-connector
 pydantic_settings
 python-multipart
+quart
+quart-cors
