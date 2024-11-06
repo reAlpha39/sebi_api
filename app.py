@@ -4,11 +4,10 @@ from routers import user
 
 app = Flask(__name__)
 CORS(app, resources={
-    r"/*": {
-        "origins": "*",
-        "allow_credentials": True,
-        "methods": ["*"],
-        "headers": ["*"]
+    r"/api/*": {
+        "origins": ["https://porcalabs.github.io"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
     }
 })
 
