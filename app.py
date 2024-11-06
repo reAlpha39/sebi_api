@@ -5,7 +5,7 @@ from routers import user
 app = Flask(__name__)
 CORS(app, resources={
     r"/api/*": {
-        "origins": ["*"],
+        "origins": ["https://porcalabs.github.io"],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Origin", "Content-Type", "Authorization"]
     }
