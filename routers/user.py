@@ -19,14 +19,20 @@ def run_async(coro):
 
 @bp.route('/', methods=['POST'])
 def create_user():
-    data = request.get_json()
-    user_data = UserCreate(**data)  # Validate using Pydantic model
-    created_user = run_async(UserModel.create_user(user_data.model_dump()))
-    return jsonify({
-        "status": "success",
-        "message": "User successfully created",
-        "data": created_user
-    })
+    try:
+        data = request.get_json()
+        user_data = UserCreate(**data)  # Validate using Pydantic model
+        created_user = run_async(UserModel.create_user(user_data.model_dump()))
+        return jsonify({
+            "status": "success",
+            "message": "User successfully created",
+            "data": created_user
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 400
 
 
 @bp.route('/', methods=['GET'])
@@ -80,18 +86,30 @@ def get_users():
 
 @bp.route('/<int:user_id>', methods=['PUT'])
 def update_user(user_id):
-    data = request.get_json()
-    user_data = UserUpdate(**data)  # Validate using Pydantic model
-    updated_user = run_async(UserModel.update_user(
-        user_id, user_data.model_dump()))
-    return jsonify({
-        "status": "success",
-        "message": "User successfully updated",
-        "data": updated_user
-    })
+    try:
+        data = request.get_json()
+        user_data = UserUpdate(**data)  # Validate using Pydantic model
+        updated_user = run_async(UserModel.update_user(
+            user_id, user_data.model_dump()))
+        return jsonify({
+            "status": "success",
+            "message": "User successfully updated",
+            "data": updated_user
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 400
 
 
 @bp.route('/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
-    result = run_async(UserModel.delete_user(user_id))
-    return jsonify(result)
+    try:
+        result = run_async(UserModel.delete_user(user_id))
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 400
