@@ -76,16 +76,32 @@ class UserModel:
                     u.deleted_at
                 FROM users u
                 LEFT JOIN results r ON u.result_id = r.id
-                WHERE u.deleted_at IS NULL
-                AND (r.deleted_at IS NULL OR r.id IS NULL)
+                WHERE 1=1
             '''
 
-            count_query = "SELECT COUNT(*) as total FROM users WHERE 1=1"
+            # Start with base conditions
+            if not include_deleted:
+                base_query += " AND u.deleted_at IS NULL"
+
+            # Always check results deleted_at
+            base_query += " AND (r.deleted_at IS NULL OR r.id IS NULL)"
+
+            count_query = '''
+                SELECT COUNT(*) as total
+                FROM users u
+                LEFT JOIN results r ON u.result_id = r.id
+                WHERE 1=1
+            '''
+
+            if not include_deleted:
+                count_query += " AND u.deleted_at IS NULL"
+            count_query += " AND (r.deleted_at IS NULL OR r.id IS NULL)"
+
             params = []
 
             # Add search condition
             if search:
-                search_condition = " AND (name LIKE %s OR (no_hp IS NOT NULL AND no_hp LIKE %s))"
+                search_condition = " AND (u.name LIKE %s OR (u.no_hp IS NOT NULL AND u.no_hp LIKE %s))"
                 base_query += search_condition
                 count_query += search_condition
                 search_param = f"%{search}%"
@@ -93,28 +109,23 @@ class UserModel:
 
             # Add date filters
             if from_date:
-                date_condition = " AND take_date >= %s"
+                date_condition = " AND u.take_date >= %s"
                 base_query += date_condition
                 count_query += date_condition
                 params.append(from_date)
 
             if to_date:
-                date_condition = " AND take_date <= %s"
+                date_condition = " AND u.take_date <= %s"
                 base_query += date_condition
                 count_query += date_condition
                 params.append(to_date)
-
-            if not include_deleted:
-                deleted_condition = " AND deleted_at IS NULL"
-                base_query += deleted_condition
-                count_query += deleted_condition
 
             # Get total count
             cursor.execute(count_query, params)
             total_records = cursor.fetchone()['total']
 
             # Add pagination
-            base_query += " ORDER BY created_at DESC LIMIT %s OFFSET %s"
+            base_query += " ORDER BY u.created_at DESC LIMIT %s OFFSET %s"
             offset = (page - 1) * limit
             params.extend([limit, offset])
 
