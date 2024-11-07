@@ -5,7 +5,7 @@ from routers import user, result
 app = Flask(__name__)
 CORS(app,
     resources={
-        r"/api/*":
+        r"/*":
         {
             "origins": ["https://porcalabs.github.io"],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -33,8 +33,13 @@ def handle_preflight():
 
 
 # Register blueprints with api prefix
-app.register_blueprint(user.bp, url_prefix='/api/users')
-app.register_blueprint(result.bp, url_prefix='/api/results')
+app.register_blueprint(user.bp, url_prefix='/users')
+app.register_blueprint(result.bp, url_prefix='/results')
+
+
+@app.route('/')
+def hello():
+    return "Hello, application is running!"
 
 application = app
 
