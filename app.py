@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, make_response
 from flask_cors import CORS
 from routers import user, result
 
@@ -24,17 +24,17 @@ def handle_preflight():
     if request.method == "OPTIONS":
         response = make_response()
         response.headers.add("Access-Control-Allow-Origin",
-                             "https://porcalabs.github.io")
+                            "https://porcalabs.github.io")
         response.headers.add("Access-Control-Allow-Headers", "*")
         response.headers.add("Access-Control-Allow-Methods",
-                             "GET, POST, PUT, DELETE, OPTIONS")
+                            "GET, POST, PUT, DELETE, OPTIONS")
         response.headers.add("Access-Control-Max-Age", "86400")
         return response
 
 
-# Register blueprints
-app.register_blueprint(user.bp, url_prefix='/users')
-app.register_blueprint(result.bp, url_prefix='/results')
+# Register blueprints with api prefix
+app.register_blueprint(user.bp, url_prefix='/api/users')
+app.register_blueprint(result.bp, url_prefix='/api/results')
 
 application = app
 
