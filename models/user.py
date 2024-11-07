@@ -76,7 +76,8 @@ class UserModel:
                     u.deleted_at
                 FROM users u
                 LEFT JOIN results r ON u.result_id = r.id
-                WHERE 1=1
+                WHERE u.deleted_at IS NULL
+                AND (r.deleted_at IS NULL OR r.id IS NULL)
             '''
 
             count_query = "SELECT COUNT(*) as total FROM users WHERE 1=1"
