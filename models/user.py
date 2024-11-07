@@ -62,7 +62,7 @@ class UserModel:
             db = get_db_connection()
             cursor = db.cursor(dictionary=True)
 
-            Copybase_query = '''
+            base_query = '''
                 SELECT
                     u.id,
                     u.name,
