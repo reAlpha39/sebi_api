@@ -149,9 +149,21 @@ class UserModel:
             cursor = db.cursor(dictionary=True)
 
             select_query = '''
-            SELECT id, name, no_hp, take_date, image, created_at, updated_at, deleted_at
-            FROM users 
-            WHERE id = %s
+            SELECT
+                u.id,
+                u.name,
+                u.no_hp,
+                u.take_date,
+                u.image,
+                u.result_id,
+                r.title as result_title,
+                u.created_at,
+                u.updated_at,
+                u.deleted_at
+            FROM users u
+            LEFT JOIN results r ON u.result_id = r.id
+            WHERE u.id = %s
+            AND (r.deleted_at IS NULL OR r.id IS NULL)
             '''
 
             cursor.execute(select_query, (user_id,))
@@ -177,28 +189,69 @@ class UserModel:
             cursor = db.cursor(dictionary=True)
 
             # Check if user exists and is not deleted
-            check_query = "SELECT id FROM users WHERE id = %s AND deleted_at IS NULL"
+            check_query = '''
+            SELECT u.id
+            FROM users u
+            WHERE u.id = %s AND u.deleted_at IS NULL
+            '''
             cursor.execute(check_query, (user_id,))
             if not cursor.fetchone():
                 raise HTTPException(
                     status_code=404, detail="User not found or already deleted")
 
+            # If result_id is provided, check if it exists
+            if 'result_id' in user_data:
+                check_result_query = '''
+                SELECT id
+                FROM results
+                WHERE id = %s AND deleted_at IS NULL
+                '''
+                cursor.execute(check_result_query, (user_data['result_id'],))
+                if not cursor.fetchone():
+                    raise HTTPException(
+                        status_code=400, 
+                        detail=f"Result with ID {user_data['result_id']} does not exist or is deleted"
+                    )
+
             take_date_formatted = user_data['take_date'].strftime(
                 '%Y-%m-%d %H:%M:%S') if user_data.get('take_date') else None
 
-            update_query = '''
+            update_parts = []
+            values = []
+
+            # Dynamically build update query based on provided fields
+            if 'name' in user_data:
+                update_parts.append("name = %s")
+                values.append(user_data['name'])
+
+            if 'no_hp' in user_data:
+                update_parts.append("no_hp = %s")
+                values.append(user_data.get('no_hp'))
+
+            if 'take_date' in user_data:
+                update_parts.append("take_date = %s")
+                values.append(take_date_formatted)
+
+            if 'image' in user_data:
+                update_parts.append("image = %s")
+                values.append(user_data['image'])
+
+            if 'result_id' in user_data:
+                update_parts.append("result_id = %s")
+                values.append(user_data['result_id'])
+
+            # Add updated_at
+            update_parts.append("updated_at = %s")
+            values.append(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
+            # Add user_id for WHERE clause
+            values.append(user_id)
+
+            update_query = f'''
             UPDATE users 
-            SET name = %s, no_hp = %s, take_date = %s, image = %s
+            SET {', '.join(update_parts)}
             WHERE id = %s AND deleted_at IS NULL
             '''
-
-            values = (
-                user_data['name'],
-                user_data.get('no_hp'),
-                take_date_formatted,
-                user_data['image'],
-                user_id
-            )
 
             cursor.execute(update_query, values)
             db.commit()
@@ -222,8 +275,8 @@ class UserModel:
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
             update_query = '''
-            UPDATE users 
-            SET deleted_at = %s 
+            UPDATE users
+            SET deleted_at = %s
             WHERE id = %s AND deleted_at IS NULL
             '''
 
