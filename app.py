@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
-from routers import user
+from routers import user, result
 
 app = Flask(__name__)
 CORS(app,
@@ -31,8 +31,10 @@ def handle_preflight():
         response.headers.add("Access-Control-Max-Age", "86400")
         return response
 
+
 # Register blueprints
-app.register_blueprint(user.bp)
+app.register_blueprint(user.bp, url_prefix='/users')
+app.register_blueprint(result.bp, url_prefix='/results')
 
 application = app
 

@@ -16,8 +16,8 @@ class UserModel:
                 '%Y-%m-%d %H:%M:%S') if user_data.get('take_date') else None
 
             insert_query = '''
-            INSERT INTO users (name, no_hp, take_date, image, created_at, updated_at)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO users (name, no_hp, take_date, image, result_id, created_at, updated_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
             '''
 
             values = (
@@ -25,9 +25,20 @@ class UserModel:
                 user_data.get('no_hp'),
                 take_date_formatted,
                 user_data['image'],
+                user_data.get('result_id'),
                 current_time,
                 current_time
             )
+
+            # Validate result_id exists if provided
+            if user_data.get('result_id'):
+                check_result_query = "SELECT id FROM results WHERE id = %s"
+                cursor.execute(check_result_query, (user_data['result_id'],))
+                if not cursor.fetchone():
+                    raise HTTPException(
+                        status_code=400, 
+                        detail=f"Result with ID {user_data['result_id']} does not exist"
+                    )
 
             cursor.execute(insert_query, values)
             user_id = cursor.lastrowid
@@ -51,10 +62,21 @@ class UserModel:
             db = get_db_connection()
             cursor = db.cursor(dictionary=True)
 
-            base_query = '''
-            SELECT id, name, no_hp, take_date, image, created_at, updated_at, deleted_at
-            FROM users
-            WHERE 1=1
+            Copybase_query = '''
+                SELECT
+                    u.id,
+                    u.name,
+                    u.no_hp,
+                    u.take_date,
+                    u.image,
+                    u.result_id,
+                    r.title as result_title,
+                    u.created_at,
+                    u.updated_at,
+                    u.deleted_at
+                FROM users u
+                LEFT JOIN results r ON u.result_id = r.id
+                WHERE 1=1
             '''
 
             count_query = "SELECT COUNT(*) as total FROM users WHERE 1=1"

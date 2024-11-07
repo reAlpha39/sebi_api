@@ -4,6 +4,7 @@ import asyncio
 from models.user import UserModel
 from schemas.user import UserCreate, UserUpdate
 
+
 bp = Blueprint('user', __name__)
 
 
