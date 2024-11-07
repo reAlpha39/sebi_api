@@ -19,6 +19,7 @@ class UserBase(BaseModel):
     no_hp: Optional[str] = None
     take_date: Optional[datetime] = None
     image: str
+    result_id: int
 
 
 class UserCreate(UserBase):
