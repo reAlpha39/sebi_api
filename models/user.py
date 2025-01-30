@@ -17,7 +17,7 @@ class UserModel:
 
             insert_query = '''
             INSERT INTO users (name, no_hp, prodi, take_date, image, result_id, created_at, updated_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             '''
 
             values = (
