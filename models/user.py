@@ -16,13 +16,14 @@ class UserModel:
                 '%Y-%m-%d %H:%M:%S') if user_data.get('take_date') else None
 
             insert_query = '''
-            INSERT INTO users (name, no_hp, take_date, image, result_id, created_at, updated_at)
+            INSERT INTO users (name, no_hp, prodi, take_date, image, result_id, created_at, updated_at)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             '''
 
             values = (
                 user_data['name'],
                 user_data.get('no_hp'),
+                user_data.get('prodi'),
                 take_date_formatted,
                 user_data['image'],
                 user_data.get('result_id'),
@@ -67,6 +68,7 @@ class UserModel:
                     u.id,
                     u.name,
                     u.no_hp,
+                    u.prodi,
                     u.take_date,
                     u.image,
                     u.result_id,
@@ -101,11 +103,11 @@ class UserModel:
 
             # Add search condition
             if search:
-                search_condition = " AND (u.name LIKE %s OR (u.no_hp IS NOT NULL AND u.no_hp LIKE %s))"
+                search_condition = " AND (u.name LIKE %s OR (u.no_hp IS NOT NULL AND u.no_hp LIKE %s)) OR (u.prodi IS NOT NULL AND u.prodi LIKE %s)"
                 base_query += search_condition
                 count_query += search_condition
                 search_param = f"%{search}%"
-                params.extend([search_param, search_param])
+                params.extend([search_param, search_param, search_param])
 
             # Add date filters
             if from_date:
@@ -153,6 +155,7 @@ class UserModel:
                 u.id,
                 u.name,
                 u.no_hp,
+                u.prodi,
                 u.take_date,
                 u.image,
                 u.result_id,
@@ -227,6 +230,10 @@ class UserModel:
             if 'no_hp' in user_data:
                 update_parts.append("no_hp = %s")
                 values.append(user_data.get('no_hp'))
+
+            if 'prodi' in user_data:
+                update_parts.append("prodi = %s")
+                values.append(user_data.get('prodi'))
 
             if 'take_date' in user_data:
                 update_parts.append("take_date = %s")

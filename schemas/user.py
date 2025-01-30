@@ -17,6 +17,7 @@ def validate_user_update(data):
 class UserBase(BaseModel):
     name: str
     no_hp: Optional[str] = None
+    prodi: Optional[str] = None
     take_date: Optional[datetime] = None
     image: str
     result_id: int
